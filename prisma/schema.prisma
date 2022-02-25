@@ -1,0 +1,146 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+model User {
+  id                  String                 @id
+  email               String                 @unique
+  createdAt           DateTime               @default(now())
+  username            String
+  password            String
+  emailverified       Boolean                @default(false)
+  type                UserType               @default(candidate)
+  reset               Reset?
+  jobs                Job[]
+  refreshToken        Refreshtoken[]
+  recruiter           Recruiter[]
+  candidate           CandidateInformation[]
+  candidateEducation  CandidateEducation[]
+  candidateExperience CandidateExperience[]
+  candidateUploads    CandidateUploads[]
+
+  @@map("users")
+}
+
+model Refreshtoken {
+  id        String   @id @default(uuid())
+  token     String   @unique @db.VarChar(500)
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("refresh_tokens")
+}
+
+model Reset {
+  id         String @id @default(uuid())
+  resetToken String
+  user       User   @relation(fields: [userId], references: [id])
+  userId     String @unique
+
+  @@map("password_reset")
+}
+
+model Job {
+  id            String   @id @default(uuid())
+  createdAt     DateTime @default(now())
+  title         String
+  description   String
+  country       String
+  location      String
+  currency      String
+  salaryrange   String
+  category      String
+  joblink       String
+  deadline      String
+  user          User     @relation(fields: [recruiterId], references: [id])
+  recruiterId   String
+  recruiterName String
+
+  @@fulltext([title])
+  @@map("jobs")
+}
+
+model Recruiter {
+  id                String  @id @default(uuid())
+  about             String? @db.VarChar(500)
+  telephone         String?
+  email             String?
+  website           String?
+  address           String?
+  applicationMethod String?
+  photoURL          String?
+  user              User    @relation(fields: [recruiterId], references: [id])
+  recruiterId       String  @unique
+
+  @@map("recruiters")
+}
+
+model CandidateInformation {
+  id                   String  @id @default(uuid())
+  user                 User    @relation(fields: [candidateId], references: [id])
+  candidateId          String  @unique
+  fullName             String?
+  telephoneOne         String?
+  telephoneTwo         String?
+  identification       String?
+  identificationNumber String?
+  photoURL             String?
+  nationality          String?
+  location             String?
+  gender               String?
+  dateOfBirth          String?
+
+  @@map("candidates")
+}
+
+model CandidateEducation {
+  id            String  @id @default(uuid())
+  candidate     User    @relation(fields: [candidateId], references: [id])
+  candidateId   String
+  institution   String?
+  course        String?
+  level         String?
+  dateCompleted String?
+  qualification String?
+
+  @@map("candidate_education")
+}
+
+model CandidateExperience {
+  id          String  @id @default(uuid())
+  candidate   User    @relation(fields: [candidateId], references: [id])
+  candidateId String
+  employer    String?
+  position    String?
+  from        String?
+  to          String?
+  remark      String?
+
+  @@map("candidate_experience")
+}
+
+model CandidateUploads {
+  id          String  @id @default(uuid())
+  candidate   User    @relation(fields: [candidateId], references: [id])
+  candidateId String
+  fileType    String?
+  fileName    String?
+  fileURL     String?
+
+  @@map("candidate_uploads")
+}
+
+enum UserType {
+  candidate
+  recruiter
+}
