@@ -282,8 +282,9 @@ router.get("/logout", async (req, res) => {
     if (!user) {
       res.clearCookie("jwt", {
         httpOnly: true,
-        secure: true,
+        // maxAge: 1000 * 60 * 60 * 24 * 7,
         sameSite: "None",
+        secure: true,
       });
       return res.status(204).send({ message: "No content" });
     }
