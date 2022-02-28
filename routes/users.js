@@ -273,6 +273,7 @@ router.get("/logout", async (req, res) => {
   const cookies = req.cookies;
   if (!cookies?.jwt) return res.status(204).send({ message: "No content" });
   const refreshToken = cookies.jwt;
+  console.log("working", refreshToken);
   try {
     const user = await prisma.refreshtoken.findUnique({
       where: {
