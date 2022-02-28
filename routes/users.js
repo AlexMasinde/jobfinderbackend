@@ -299,6 +299,7 @@ router.get("/logout", async (req, res) => {
       sameSite: "None",
       secure: true,
     });
+    res.sendStatus(204);
   } catch (err) {
     res.status(500).json({ error: "Could not logout! Try again" });
     console.log(err);
