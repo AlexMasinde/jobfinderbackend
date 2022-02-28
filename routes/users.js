@@ -281,9 +281,9 @@ router.get("/logout", async (req, res) => {
       },
     });
     if (!user) {
+      console.log("no user found");
       res.clearCookie("jwt", {
         httpOnly: true,
-        // maxAge: 1000 * 60 * 60 * 24 * 7,
         sameSite: "None",
         secure: true,
       });
@@ -296,10 +296,9 @@ router.get("/logout", async (req, res) => {
     });
     res.clearCookie("jwt", {
       httpOnly: true,
-      secure: true,
       sameSite: "None",
+      secure: true,
     });
-    res.sendStatus(204);
   } catch (err) {
     res.status(500).json({ error: "Could not logout! Try again" });
     console.log(err);
