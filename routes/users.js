@@ -10,6 +10,7 @@ const { createRefreshToken } = require("../utils/createRefreshToken");
 const { sendCookie } = require("../utils/sendCookie");
 
 const prisma = require("../config/prisma");
+const getUser = require("../middleware/getUser");
 
 //Register users
 router.post("/signup", async (req, res) => {
@@ -256,7 +257,9 @@ router.get("/refresh", async (req, res) => {
           return res.status(403).send({ error: "Not authorized" });
         const accessToken = createAccessToken(decoded.id, decoded.type);
         sendCookie(res, refreshToken);
-        res.status(200).send({ accessToken });
+        res
+          .status(200)
+          .send({ accessToken, type: decoded.type, userId: decoded.id });
       }
     );
   } catch (err) {
@@ -298,6 +301,56 @@ router.get("/logout", async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Could not logout! Try again" });
     console.log(err);
+  }
+});
+
+//search candidates
+router.post("/search", async (req, res) => {
+  try {
+    const candidates = await prisma.candidateInformation.findMany(req.body);
+    res.status(200).send(candidates);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
+
+//change password
+router.post("/new-password", getUser, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const { id } = req.user;
+  console.log(req.body);
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (!user) {
+      return res.status(404).send({
+        error: "User not found",
+      });
+    }
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).send({
+        error: "Incorrect password",
+      });
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    await prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
+    res.sendStatus(200);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
   }
 });
 

@@ -6,6 +6,7 @@ const exclude = require("../utils/exclude");
 const { handleUpload } = require("../utils/imageHandler");
 
 const prisma = require("../config/prisma");
+const { user } = require("../config/prisma");
 const upload = multer({ desc: "uploads/" });
 
 //recruiter routes start here
@@ -70,6 +71,11 @@ router.post("/candidate-profile", getUser, async (req, res) => {
   if (type !== "candidate") return res.sendStatus(401);
 
   try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
     const response = await prisma.candidateInformation.upsert({
       where: {
         candidateId: id,
@@ -80,6 +86,7 @@ router.post("/candidate-profile", getUser, async (req, res) => {
       create: {
         ...req.body,
         candidateId: id,
+        email: user.email,
       },
     });
     res.status(201).send(response);

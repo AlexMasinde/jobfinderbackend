@@ -3,6 +3,7 @@ const router = require("express").Router();
 const getUser = require("../middleware/getUser");
 
 const prisma = require("../config/prisma");
+const { PrismaClientKnownRequestError } = require("@prisma/client/runtime");
 
 //create job positing
 router.post("/create", getUser, async (req, res) => {
@@ -109,6 +110,31 @@ router.get("/", async (req, res) => {
       take: 20,
     });
     res.status(200).send(jobs);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
+
+//subscribe to job post
+router.post("/subscribe", async (req, res) => {
+  const { email, category } = req.body;
+  console.log(req.body);
+  try {
+    const subscription = await prisma.subscribers.findUnique({
+      where: {
+        email: email,
+      },
+    });
+    if (subscription)
+      return res.status(400).send({ error: "You are already subscribed" });
+    await prisma.subscribers.create({
+      data: {
+        email: email,
+        category: category,
+      },
+    });
+    res.sendStatus(201);
   } catch (err) {
     console.log(err);
     res.sendStatus(500);

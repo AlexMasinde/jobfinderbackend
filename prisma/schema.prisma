@@ -92,6 +92,7 @@ model CandidateInformation {
   fullName             String?
   telephoneOne         String?
   telephoneTwo         String?
+  email                String?
   identification       String?
   identificationNumber String?
   photoURL             String?
@@ -100,6 +101,7 @@ model CandidateInformation {
   gender               String?
   dateOfBirth          String?
 
+  @@fulltext([fullName])
   @@map("candidates")
 }
 
@@ -138,6 +140,15 @@ model CandidateUploads {
   fileURL     String?
 
   @@map("candidate_uploads")
+}
+
+model Subscribers {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  category  String
+
+  @@map("subscribers")
 }
 
 enum UserType {
