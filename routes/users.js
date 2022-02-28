@@ -269,7 +269,7 @@ router.get("/refresh", async (req, res) => {
 });
 
 router.get("/logout", async (req, res) => {
-  console.log("working", refreshToken);
+  console.log("working to logout user");
   //also delete access token on client
   const cookies = req.cookies;
   if (!cookies?.jwt) return res.status(204).send({ message: "No content" });
