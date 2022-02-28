@@ -269,11 +269,11 @@ router.get("/refresh", async (req, res) => {
 });
 
 router.get("/logout", async (req, res) => {
+  console.log("working", refreshToken);
   //also delete access token on client
   const cookies = req.cookies;
   if (!cookies?.jwt) return res.status(204).send({ message: "No content" });
   const refreshToken = cookies.jwt;
-  console.log("working", refreshToken);
   try {
     const user = await prisma.refreshtoken.findUnique({
       where: {
@@ -308,6 +308,7 @@ router.get("/logout", async (req, res) => {
 
 //search candidates
 router.post("/search", async (req, res) => {
+  console.log("searching candidates");
   try {
     const candidates = await prisma.candidateInformation.findMany(req.body);
     res.status(200).send(candidates);
